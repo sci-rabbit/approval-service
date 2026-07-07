@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from sqlalchemy.exc import IntegrityError
 from starlette.responses import JSONResponse
 
 from api.v1.routes.health import router as health_router
@@ -30,6 +31,15 @@ async def app_exception_handler(request, exc: BaseAppException):
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail},
+    )
+
+
+@app.exception_handler(IntegrityError)
+async def integrity_error_handler(request, exc: IntegrityError):
+    logger.warning("Integrity error on %s", request.url.path)
+    return JSONResponse(
+        status_code=409,
+        content={"detail": "Conflicting or duplicate request"},
     )
 
 
