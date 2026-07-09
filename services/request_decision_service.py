@@ -17,7 +17,6 @@ from repositories.outbox_event_repository import OutboxEventRepository
 
 class RequestDecisionService:
     def __init__(self, session):
-        self.session = session
         self.request_repo = ApprovalRequestRepository(session=session)
         self.event_repo = ApprovalEventRepository(session=session)
         self.outbox_event_repo = OutboxEventRepository(session=session)

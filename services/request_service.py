@@ -1,5 +1,4 @@
 import uuid
-from dataclasses import asdict
 
 from dto.approval_request_dto import CreateApprovalRequestDto
 
@@ -18,7 +17,6 @@ from repositories.outbox_event_repository import OutboxEventRepository
 
 class RequestService:
     def __init__(self, session):
-        self.session = session
         self.request_repo = ApprovalRequestRepository(session=session)
         self.event_repo = ApprovalEventRepository(session=session)
         self.outbox_event_repo = OutboxEventRepository(session=session)
@@ -38,19 +36,11 @@ class RequestService:
                 workspace_id=dto.workspace_id,
             )
 
-        data = asdict(dto)
-
-        reviewer_user_ids = data.pop("reviewer_user_ids")
-        data.pop("actor_user_id")
-
-        request = await self.request_repo.create(
-            **data,
-            created_by=dto.actor_user_id,
-        )
+        request = await self.request_repo.create(**dto.to_request_fields())
 
         await self.reviewer_repo.create_many(
             request=request,
-            reviewer_user_ids=reviewer_user_ids,
+            reviewer_user_ids=dto.reviewer_user_ids,
         )
 
         await self.idempotency_repo.create(
@@ -105,5 +95,3 @@ class RequestService:
             raise RequestNotFound()
 
         return request
-
-

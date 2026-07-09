@@ -33,3 +33,13 @@ class CreateApprovalRequestDto:
             description=schema.description,
             reviewer_user_ids=schema.reviewer_user_ids,
         )
+    
+    def to_request_fields(self) -> dict:
+        return {
+            "workspace_id": self.workspace_id,
+            "source_type": self.source_type,
+            "source_id": self.source_id,
+            "title": self.title,
+            "description": self.description,
+            "created_by": self.actor_user_id,
+        }
